@@ -1,0 +1,3 @@
+[submodule "triesearch"]
+	path = triesearch
+	url = ../triesearch
