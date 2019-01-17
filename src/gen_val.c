@@ -17,7 +17,7 @@ int next_val(void)
 
     unsigned char ret = buffer & get_mask(5);
     buffer = temp << (8 - buffer_size);
-    buffer_size = (buffer_size + 5) % 8
+    buffer_size = (buffer_size + 5) % 8;
 
     return ret;
 }
