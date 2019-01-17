@@ -16,81 +16,7 @@
 #include <stdio.h>
 #include <math.h>
 
-main()
-{
-  double pid, s1, s2, s3, s4;
-  double series (int m, int n);
-  void ihex (double x, int m, char c[]);
-  int id = 1000000;
-#define NHX 16
-  char chx[NHX];
-
-/*  id is the digit position.  Digits generated follow immediately after id. */
-
-  s1 = series (1, id);
-  s2 = series (4, id);
-  s3 = series (5, id);
-  s4 = series (6, id);
-  pid = 4. * s1 - 2. * s2 - s3 - s4;
-  pid = pid - (int) pid + 1.;
-  ihex (pid, NHX, chx);
-  printf (" position = %i\n fraction = %.15f \n hex digits =  %10.10s\n",
-  id, pid, chx);
-}
-
-void ihex (double x, int nhx, char chx[])
-
-/*  This returns, in chx, the first nhx hex digits of the fraction of x. */
-
-{
-  int i;
-  double y;
-  char hx[] = "0123456789ABCDEF";
-
-  y = fabs (x);
-
-  for (i = 0; i < nhx; i++){
-    y = 16. * (y - floor (y));
-    chx[i] = hx[(int) y];
-  }
-}
-
-double series (int m, int id)
-
-/*  This routine evaluates the series  sum_k 16^(id-k)/(8*k+m) 
-    using the modular exponentiation technique. */
-
-{
-  int k;
-  double ak, eps, p, s, t;
-  double expm (double x, double y);
-#define eps 1e-17
-
-  s = 0.;
-
-/*  Sum the series up to id. */
-
-  for (k = 0; k < id; k++){
-    ak = 8 * k + m;
-    p = id - k;
-    t = expm (p, ak);
-    s = s + t / ak;
-    s = s - (int) s;
-  }
-
-/*  Compute a few terms where k >= id. */
-
-  for (k = id; k <= id + 100; k++){
-    ak = 8 * k + m;
-    t = pow (16., (double) (id - k)) / ak;
-    if (t < eps) break;
-    s = s + t;
-    s = s - (int) s;
-  }
-  return s;
-}
-
-double expm (double p, double ak)
+static double expm (double p, double ak)
 
 /*  expm = 16^p mod ak.  This routine uses the left-to-right binary 
     exponentiation scheme. */
@@ -137,4 +63,55 @@ double expm (double p, double ak)
   }
 
   return r;
+}
+
+static double series (int m, int id)
+
+/*  This routine evaluates the series  sum_k 16^(id-k)/(8*k+m) 
+    using the modular exponentiation technique. */
+
+{
+  int k;
+  double ak, p, s, t;
+#define eps 1e-17
+
+  s = 0.;
+
+/*  Sum the series up to id. */
+
+  for (k = 0; k < id; k++){
+    ak = 8 * k + m;
+    p = id - k;
+    t = expm (p, ak);
+    s = s + t / ak;
+    s = s - (int) s;
+  }
+
+/*  Compute a few terms where k >= id. */
+
+  for (k = id; k <= id + 100; k++){
+    ak = 8 * k + m;
+    t = pow (16., (double) (id - k)) / ak;
+    if (t < eps) break;
+    s = s + t;
+    s = s - (int) s;
+  }
+  return s;
+}
+
+unsigned char get_byte(int id)
+{
+  double s1 = series (1, id);
+  double s2 = series (4, id);
+  double s3 = series (5, id);
+  double s4 = series (6, id);
+  double pid = 4. * s1 - 2. * s2 - s3 - s4;
+  pid = pid - (int) pid + 1.;
+
+  double y = fabs(pid);
+  y = 16. * (y - floor (y));
+  unsigned char first = y;
+  y = 16. * (y - floor (y));
+  unsigned char second = y;
+  return (first << 4) | second;
 }
