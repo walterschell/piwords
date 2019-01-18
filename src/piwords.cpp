@@ -3,6 +3,9 @@
 #include <list>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+
+#define PRINT_PROGRESS 1
 
 #include "gen_val.h"
 
@@ -35,13 +38,16 @@ int main(int argc, char ** argv)
         digits.push_back(next_val());
         curr_digit++;
         temp_percent = static_cast<int>((static_cast<float>(curr_digit) / num_digits) * 100);
+#if PRINT_PROGRESS
         if (curr_percent != temp_percent)
         {
             curr_percent = temp_percent;
             std::cout << "\x1B[1G\x1B[0K" << curr_percent << "%";
             std::cout.flush();
         }
+#endif
     }
+    std::cout << std::endl;
 
     std::ifstream inf(file_name);
 
@@ -57,6 +63,8 @@ int main(int argc, char ** argv)
     {
         string word;
         inf >> word;
+        std::transform(word.begin(), word.end(),
+                       word.begin(), ::tolower);
         trie.add_word(word);
     }
     std::list<Match> matches;
@@ -65,11 +73,11 @@ int main(int argc, char ** argv)
     match_sequence(digits, 0, matches, partial_matches,
                    trie, 3);
 
-    std::cout << "Found " << matches.size() << " matches." << std::endl;
+    std::cout << "Found " << matches.size() << " matches:" << std::endl;
 
     for(auto match : matches)
     {
-        std::cout << match.index << ": " << match.word << std::endl;
+        std::cout << "\t" << match.index << ": " << match.word << std::endl;
     }
 
     std::cout << std::endl;
