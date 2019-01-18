@@ -26,9 +26,21 @@ int main(int argc, char ** argv)
     }
 
     std::vector<int> digits;
-    while(num_digits-- > 0)
+    size_t curr_digit = 0;
+    int curr_percent = -1;
+    int temp_percent;
+    std::cout << "Building Values, progress: " << std::endl;
+    while(curr_digit < num_digits)
     {
         digits.push_back(next_val());
+        curr_digit++;
+        temp_percent = static_cast<int>((static_cast<float>(curr_digit) / num_digits) * 100);
+        if (curr_percent != temp_percent)
+        {
+            curr_percent = temp_percent;
+            std::cout << "\x1B[1G\x1B[0K" << curr_percent << "%";
+            std::cout.flush();
+        }
     }
 
     std::ifstream inf(file_name);
