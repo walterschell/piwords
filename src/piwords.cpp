@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <unordered_map>
 
 #define PRINT_PROGRESS 1
 
@@ -73,11 +74,35 @@ int main(int argc, char ** argv)
     match_sequence(digits, 0, matches, partial_matches,
                    trie, 3);
 
+
     std::cout << "Found " << matches.size() << " matches:" << std::endl;
+    std::unordered_map<std::string, std::vector<uint64_t>> unique;
 
     for(auto match : matches)
     {
-        std::cout << "\t" << match.index << ": " << match.word << std::endl;
+        if(unique.find(match.word) == unique.end())
+        {
+            unique[match.word] = {match.index};
+        }
+        else
+        {
+            unique[match.word].push_back(match.index);
+        }
+    }
+
+    std::cout << "Found " << unique.size() << " unique matches.\n" << std::endl;
+
+    for(auto u : unique)
+    {
+        auto word = u.first;
+        auto indexes = u.second;
+        std::cout << word << " located " << indexes.size() << " times:" << std::endl;
+        std::cout << "\t";
+        for(auto index : indexes)
+        {
+            std::cout << index << " ";
+        }
+        std::cout << std::endl;
     }
 
     std::cout << std::endl;
