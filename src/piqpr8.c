@@ -13,8 +13,12 @@
 
 /*  David H. Bailey     2006-09-08 */
 
+/* TODO: Use cmake to determine if 128 bit float (aka long double) is
+ * a type */
+
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
 
 static double expm (double p, double ak)
 
@@ -29,6 +33,9 @@ static double expm (double p, double ak)
   static int tp1 = 0;
 
 /*  If this is the first call to expm, fill the power of two table tp. */
+ /* TODO: This is garbage. Use Bit bash technique to find leftmost bit and
+  * convert to double.
+  */
 
   if (tp1 == 0) {
     tp1 = 1;
@@ -110,8 +117,8 @@ unsigned char get_byte(int id)
 
   double y = fabs(pid);
   y = 16. * (y - floor (y));
-  unsigned char first = y;
+  unsigned char first = (unsigned char)y;
   y = 16. * (y - floor (y));
-  unsigned char second = y;
-  return (first << 4) | second;
+  unsigned char second = (unsigned char)y;
+  return (unsigned char)(first << 4) | second;
 }
