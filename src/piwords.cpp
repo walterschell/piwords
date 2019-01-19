@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
     size_t curr_digit = 0;
     int curr_percent = -1;
     int temp_percent;
-    std::cout << "Building Values, progress: " << std::endl;
+    std::cerr << "Building Values, progress: " << std::endl;
     while(curr_digit < num_digits)
     {
         digits.push_back(next_val());
@@ -43,8 +43,8 @@ int main(int argc, char ** argv)
         if (curr_percent != temp_percent)
         {
             curr_percent = temp_percent;
-            std::cout << "\x1B[1G\x1B[0K" << curr_percent << "%";
-            std::cout.flush();
+            std::cerr << "\x1B[1G\x1B[0K" << curr_percent << "%";
+            std::cerr.flush();
         }
 #endif
     }
@@ -75,7 +75,7 @@ int main(int argc, char ** argv)
                    trie, 3);
 
 
-    std::cout << "Found " << matches.size() << " matches:" << std::endl;
+
     std::unordered_map<std::string, std::vector<uint64_t>> unique;
 
     for(auto match : matches)
@@ -90,13 +90,14 @@ int main(int argc, char ** argv)
         }
     }
 
-    std::cout << "Found " << unique.size() << " unique matches.\n" << std::endl;
+    std::cout << "Found " << matches.size() << " matches ("
+              << unique.size() << " unique)" << std::endl;
 
     for(auto u : unique)
     {
         auto word = u.first;
         auto indexes = u.second;
-        std::cout << word << " located " << indexes.size() << " times:" << std::endl;
+        std::cout << "    " << word << " located " << indexes.size() << " times:" << std::endl;
         std::cout << "\t";
         for(auto index : indexes)
         {
@@ -106,6 +107,6 @@ int main(int argc, char ** argv)
     }
 
     std::cout << std::endl;
-
+    std::cerr << "Done." << std::endl;
     return 0;
 }
