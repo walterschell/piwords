@@ -33,9 +33,6 @@ static double expm (double p, double ak)
   static int tp1 = 0;
 
 /*  If this is the first call to expm, fill the power of two table tp. */
- /* TODO: This is garbage. Use Bit bash technique to find leftmost bit and
-  * convert to double.
-  */
 
   if (tp1 == 0) {
     tp1 = 1;

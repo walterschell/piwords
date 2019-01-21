@@ -5,7 +5,9 @@
 extern "C" {
 #endif
 
-int next_val(void);
+int init_vals(const char *file);
+int next_val(int *p_good);
+void deinit_vals(void);
 
 #ifdef __cplusplus
 }

@@ -1,72 +1,71 @@
 #include "gen_val.h"
 #include "piqpr8.h"
 #include <stddef.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <unistd.h>
+#include <mpfr.h>
+#include <sys/wait.h>
+#include <sys/types.h>
 
-static int __index = 1;
-static uint16_t buffer = 0;
-static size_t buffer_size = 0;
+#define PERCITION 10000000
 
-static uint16_t get_mask(size_t mask_size);
+static char * g_digits = NULL;
+static size_t g_d_index = 0;
+static size_t g_max_digits = 0;
 
-const char * binstring(uint16_t x)
+int init_vals(const char *filename)
 {
-    static char buf[17];
-    memset(buf, '0', 16);
-    buf[16] = 0;
-    size_t index = 0;
-    while(x > 0)
-    {
-        if(x & 0x8000)
-        {
-            buf[index] = '1';
-        }
-        x <<= 1;
-        index++;
-    }
-    return buf;
+    FILE *fin = fopen(filename, "r");
+    mpfr_t number;
+    mpfr_exp_t exp;
+    mpfr_init2(number, PERCITION);
+    mpfr_inp_str(number, fin, 10, MPFR_RNDN);
+    g_digits = mpfr_get_str(NULL, &exp, 2, 0, number, MPFR_RNDN);
+    g_max_digits = strlen(g_digits);
+    g_d_index = 2; // move past "1."
+    return 0;
 }
 
-int next_val(void)
+int next_val(int *p_good)
 {
-    unsigned char ret;
-    // printf("buffer: %s\t", binstring(buffer));
-    // printf("buffer_size %lu;\t", buffer_size);
+    int ret = 0;
+    int count = 5;
 
-    if(buffer_size < 5)
+    while(count > 0 && g_d_index < g_max_digits)
     {
-        uint16_t temp = get_byte(__index++);
+        ret = ret << 1;
+        if(g_digits[g_d_index] == '1')
+        {
+            ret = ret | 0x01;
+        }
+        --count;
+        ++g_d_index;
+    }
 
-        // printf("temp: %s;\t", binstring(temp));
+    if(p_good)
+    {
+        *p_good = 1;
+    }
 
-        buffer |= (temp << (8 - buffer_size));
-
-        //buffer <<= (8 - buffer_size);
-
-        // printf("buffer: %s;\t", binstring(buffer));
-
-        ret = (buffer & get_mask(5)) >> 8;
-
-        buffer_size += 3;
+    if(count == 0)
+    {
+       return ret;
     }
     else
     {
-        ret = (buffer >> 8) & 0xf8;
-        buffer_size -= 5;
-        // printf("\t\t\t\t\t\t\t");
+        if(p_good)
+        {
+            *p_good = 0;
+        }
+        return 0;
     }
-
-    buffer <<= 5;
-    ret >>= 3;
-
-    // printf("ret: %s\n", binstring(ret));
-
-    return ret;
 }
 
-static uint16_t get_mask(size_t mask_size)
+void deinit_vals()
 {
-    return (0xff << (16 - mask_size)) & 0xffff;
+    if(g_digits)
+        mpfr_free_str(g_digits);
 }

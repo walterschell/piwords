@@ -14,18 +14,21 @@ int main(int argc, char ** argv)
 {
     size_t num_digits;
     char * file_name;
-    if(argc == 2)
+    char * pi_file_name;
+    if(argc == 3)
     {
         num_digits = 10000;
-        file_name = argv[1];
+        file_name = argv[2];
+        pi_file_name = argv[1];
     }
-    else if (argc == 3)
+    else if (argc == 4)
     {
         num_digits = std::stoul(std::string(argv[1]));
-        file_name = argv[2];
+        file_name = argv[3];
+        pi_file_name = argv[2];
     }
     else {
-        std::cerr << "Usage: [digits of pi] <file name>" << std::endl;
+        std::cerr << "Usage: [digits of pi] <pi file name> <file name>" << std::endl;
         return 1;
     }
 
@@ -33,22 +36,29 @@ int main(int argc, char ** argv)
     size_t curr_digit = 0;
     int curr_percent = -1;
     int temp_percent;
-    std::cerr << "Building Values, progress: " << std::endl;
-    while(curr_digit < num_digits)
+
+    std::clog << "Initializing pi..." << std::endl;
+    init_vals(pi_file_name);
+
+
+    std::clog << "Building Values, progress: " << std::endl;
+    int good = 1;
+    while(curr_digit < num_digits && good)
     {
-        digits.push_back(next_val());
+        digits.push_back(next_val(&good));
         curr_digit++;
         temp_percent = static_cast<int>((static_cast<float>(curr_digit) / num_digits) * 100);
 #if PRINT_PROGRESS
         if (curr_percent != temp_percent)
         {
             curr_percent = temp_percent;
-            std::cerr << "\x1B[1G\x1B[0K" << curr_percent << "%";
-            std::cerr.flush();
+            std::clog << "\x1B[1G\x1B[0K" << curr_percent << "%";
+            std::clog.flush();
         }
 #endif
     }
-    std::cout << std::endl;
+    deinit_vals();
+    std::clog << std::endl;
 
     std::ifstream inf(file_name);
 
@@ -107,6 +117,6 @@ int main(int argc, char ** argv)
     }
 
     std::cout << std::endl;
-    std::cerr << "Done." << std::endl;
+    std::clog << "Done." << std::endl;
     return 0;
 }
